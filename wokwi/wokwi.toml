@@ -1,4 +1,0 @@
-[wokwi]
-version = 1
-firmware = 'Keypad2/build/Keypad2.uf2'
-elf = 'Keypad2/build/Keypad2.elf'
