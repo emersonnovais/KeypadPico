@@ -22,7 +22,7 @@
       "id": "led1",
       "top": 370.8,
       "left": -466.6,
-      "attrs": { "color": "green" }
+      "attrs": { "color": "red" }
     },
     {
       "type": "wokwi-resistor",
@@ -50,9 +50,15 @@
       "id": "led2",
       "top": 428.4,
       "left": -466.6,
+      "attrs": { "color": "green" }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "led3",
+      "top": 486,
+      "left": -466.6,
       "attrs": { "color": "blue" }
     },
-    { "type": "wokwi-led", "id": "led3", "top": 486, "left": -466.6, "attrs": { "color": "red" } },
     {
       "type": "wokwi-buzzer",
       "id": "bz1",
