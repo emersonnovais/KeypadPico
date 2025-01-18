@@ -48,8 +48,18 @@ void beep(uint pin, uint duration_ms) {
 
 // Funcao para inicializar os GPIOs do keypad
 void keypad_init() {
-    // Configurar os pinos das linhas como saidas e os pinos das colunas como entradas com pull-up.
-    // (Descricao: Prepara o keypad para deteccao de teclas.)
+    for (int i = 0; i < linhas; i++) {
+        gpio_init(gpio_linhas[i]);           // Inicializa o pino da linha
+        gpio_set_dir(gpio_linhas[i], GPIO_OUT); // Configura como saída
+        gpio_put(gpio_linhas[i], 1);          // Define o estado inicial da linha como alta (1)
+    }
+
+    // Configura os pinos das colunas como entradas com pull-up
+    for (int i = 0; i < colunas; i++) {
+        gpio_init(gpio_colunas[i]);            // Inicializa o pino da coluna
+        gpio_set_dir(gpio_colunas[i], GPIO_IN);  // Configura como entrada
+        gpio_pull_up(gpio_colunas[i]);           // Habilita o resistor de pull-up
+    }
 }
 
 // Funcao para verificar qual tecla foi pressionada no keypad
