@@ -28,30 +28,31 @@ set(PICO_BOARD pico2 CACHE STRING "Board type")
 # Pull in Raspberry Pi Pico SDK (must be before project)
 include(pico_sdk_import.cmake)
 
-project(Keypad2 C CXX ASM)
+project(KeypadPicoW C CXX ASM)
 
 # Initialise the Raspberry Pi Pico SDK
 pico_sdk_init()
 
 # Add executable. Default name is the project name, version 0.1
 
-add_executable(Keypad2 Keypad2.c )
+add_executable(KeypadPicoW KeypadPicoW.c )
 
-pico_set_program_name(Keypad2 "Keypad2")
-pico_set_program_version(Keypad2 "0.1")
+pico_set_program_name(KeypadPicoW "KeypadPicoW")
+pico_set_program_version(KeypadPicoW "0.1")
 
 # Modify the below lines to enable/disable output over UART/USB
-pico_enable_stdio_uart(Keypad2 0)
-pico_enable_stdio_usb(Keypad2 1)
+pico_enable_stdio_uart(KeypadPicoW 1)
+pico_enable_stdio_usb(KeypadPicoW 1)
 
 # Add the standard library to the build
-target_link_libraries(Keypad2
-        pico_stdlib)
+target_link_libraries(KeypadPicoW
+        pico_stdlib
+        hardware_pwm)
 
 # Add the standard include files to the build
-target_include_directories(Keypad2 PRIVATE
+target_include_directories(KeypadPicoW PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}
 )
 
-pico_add_extra_outputs(Keypad2)
+pico_add_extra_outputs(KeypadPicoW)
 
