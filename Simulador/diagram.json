@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "author": "Anonymous maker",
+  "author": "Rayane Queiroz",
   "editor": "wokwi",
   "parts": [
     { "type": "board-pi-pico-w", "id": "pico", "top": 294.35, "left": 541.15, "attrs": {} },
