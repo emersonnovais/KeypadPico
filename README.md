@@ -1,6 +1,9 @@
 Projeto Keypad com Raspberry Pi Pico
 Este projeto implementa a interface com um teclado matricial (keypad) conectado a um Raspberry Pi Pico, utilizando LEDs e buzzers para respostas interativas às teclas pressionadas. Ele serve como base para atividades didáticas em projetos de microcontroladores.
 
+Vídeo: Apresentação da solução trabalhada e os resultados obtidos nos experimentos
+LINK: https://youtu.be/wzcTBoQGNF4
+
 Objetivo
 O código visa proporcionar o controle de:
 
