@@ -13,6 +13,8 @@
 #define BUZZER_PINA 21
 #define BUZZER_PINB 4
 #define BUZZER_FREQUENCY 10000
+#define SECRET_CODE "1234" // Código secreto
+#define CODE_LENGTH 4      // Tamanho do código secreto
 
 // Configuracao dos pinos GPIO para as linhas e colunas do keypad
 unsigned int gpio_linhas[linhas] = {18, 19, 20, 4};  // Pinos GPIO conectados as linhas do keypad
@@ -28,12 +30,17 @@ const char keymap[linhas][colunas] = {
 // ALL_LED_VAR
 bool all_led_var;
 
+// Variáveis para o código secreto
+char entered_code[CODE_LENGTH + 1]; // Buffer para armazenar teclas pressionadas
+int code_index = 0;                 // Índice atual no buffer
+
 // DECLARACAO DE FUNCOES
 void pwm_init_buzzer(uint pin);
 void beep(uint pin, uint duration_ms);
 void keypad_init();
 char keypad_get_key();
-void led_control();
+void led_control(int LED, bool state, char *name);
+void special_routine();
 
 // IMPLEMENTACAO DE FUNCOES
 
@@ -47,8 +54,9 @@ void pwm_init_buzzer(uint pin)
 // Funcao para emitir um beep com duracao especificada
 void beep(uint pin, uint duration_ms)
 {
-    // Configurar o duty cycle para ativar o beep e desativar apos a duracao especificada.
-    // (Descricao: Emite som no pino especificado por um tempo determinado.)
+    gpio_put(pin, 1);
+    sleep_ms(duration_ms);
+    gpio_put(pin, 0);
 }
 
 // Funcao para inicializar os GPIOs do keypad
@@ -73,10 +81,24 @@ void keypad_init()
 // Funcao para verificar qual tecla foi pressionada no keypad
 char keypad_get_key()
 {
-    // Verificar cada combinacao de linha e coluna para detectar a tecla pressionada.
-    // (Descricao: Retorna a tecla pressionada ou '\0' caso nenhuma seja pressionada.)
+    for (int l = 0; l < linhas; l++)
+    {
+        gpio_put(gpio_linhas[l], 0);
+        for (int c = 0; c < colunas; c++)
+        {
+            if (gpio_get(gpio_colunas[c]) == 0)
+            {
+                sleep_ms(50); // Debounce
+                gpio_put(gpio_linhas[l], 1);
+                return keymap[l][c];
+            }
+        }
+        gpio_put(gpio_linhas[l], 1);
+    }
+    return '\0';
 }
 
+// Funcao para controle dos LEDs
 void led_control(int LED, bool state, char *name)
 {
     if (gpio_get(LED) != state)
@@ -84,86 +106,94 @@ void led_control(int LED, bool state, char *name)
     printf("LED %d (%s): %s\n", LED, name, state ? "Ligado" : "Desligado");
 }
 
+// Funcao para a rotina especial
+void special_routine()
+{
+    for (int i = 0; i < 5; i++) // Pisca os LEDs 5 vezes
+    {
+        gpio_put(red_pin, 1);
+        gpio_put(green_pin, 1);
+        gpio_put(blue_pin, 1);
+        sleep_ms(200);
+        gpio_put(red_pin, 0);
+        gpio_put(green_pin, 0);
+        gpio_put(blue_pin, 0);
+        sleep_ms(200);
+    }
+    printf("Rotina especial ativada!\n");
+}
+
 int main()
 {
     stdio_init_all();
     all_led_var = false;
 
-    // Atividade 1: Inicialize o keypad chamando a funcao apropriada.
+    // Inicializa o keypad
     keypad_init();
 
-    // Atividade 2: Configure um loop infinito para:
-    //              - Obter a tecla pressionada utilizando a funcao keypad_get_key.
-    //              - Exibir a tecla pressionada no terminal.
-    //              - Acionar LEDs de acordo com a tecla pressionada (A, B, C ou D).
-    //              - Emitir um beep quando a tecla '#' for pressionada.
+    // Configura os pinos dos LEDs
+    gpio_init(red_pin);
+    gpio_set_dir(red_pin, GPIO_OUT);
+    gpio_put(red_pin, 0);
+
+    gpio_init(green_pin);
+    gpio_set_dir(green_pin, GPIO_OUT);
+    gpio_put(green_pin, 0);
+
+    gpio_init(blue_pin);
+    gpio_set_dir(blue_pin, GPIO_OUT);
+    gpio_put(blue_pin, 0);
+
+    // Configura o pino do buzzer
+    gpio_init(BUZZER_PINA);
+    gpio_set_dir(BUZZER_PINA, GPIO_OUT);
+    gpio_put(BUZZER_PINA, 0);
 
     while (1)
     {
-        char key = keypad_get_key(); // Obtem a tecla pressionada.
+        char key = keypad_get_key(); // Obtem a tecla pressionada
         if (key != '\0')
         {
-            printf("Tecla pressionada: %c\n", key); // Exibe a tecla pressionada.
+            printf("Tecla pressionada: %c\n", key);
 
-            // TODO: Implementar logica para controle de LEDs, buzzer e codigo secreto.
+            // Adiciona a tecla pressionada ao buffer
+            entered_code[code_index] = key;
+            code_index++;
+
+            // Verifica se o buffer está cheio
+            if (code_index == CODE_LENGTH)
+            {
+                entered_code[CODE_LENGTH] = '\0'; // Adiciona o terminador de string
+
+                // Compara com o código secreto
+                if (strcmp(entered_code, SECRET_CODE) == 0)
+                {
+                    special_routine(); // Chama a rotina especial
+                }
+                else
+                {
+                    printf("Código incorreto: %s\n", entered_code);
+                }
+
+                // Reinicia o buffer
+                code_index = 0;
+            }
+
+            // Lógica para controle de LEDs e buzzer
             switch (key)
             {
             case 'A':
-                if (gpio_get(red_pin))
-                { // on to off
-                    led_control(red_pin, false, "RED");
-                }
-                else
-                { // off to on
-                    led_control(red_pin, true, "RED");
-                }
-                break break;
-            case 'B':
-                if (gpio_get(green_pin))
-                { // on to off
-                    led_control(green_pin, false, "GREEN");
-                }
-                else
-                { // off to on
-                    led_control(green_pin, true, "GREEN");
-                }
+                led_control(red_pin, !gpio_get(red_pin), "RED");
                 break;
+            case 'B':
+                led_control(green_pin, !gpio_get(green_pin), "GREEN");
                 break;
             case 'C':
-                if (gpio_get(blue_pin))
-                { // on to off
-                    led_control(blue_pin, false, "BLUE");
-                }
-                else
-                { // off to on
-                    led_control(blue_pin, true, "BLUE");
-                }
-                break;
-                break;
-            case 'D':
-                if (all_led_var)
-                { // on to off
-                    led_control(red_pin, false, "RED");
-                    led_control(green_pin, false, "GREEN");
-                    led_control(blue_pin, false, "BLUE");
-                    all_led_var = false;
-                }
-                else
-                { // off to on
-                    led_control(red_pin, true, "RED");
-                    led_control(green_pin, true, "GREEN");
-                    led_control(blue_pin, true, "BLUE");
-                    all_led_var = true;
-                }
-                break;
+                led_control(blue_pin, !gpio_get(blue_pin), "BLUE");
                 break;
             case '#':
-                /* code */
+                beep(BUZZER_PINA, 200);
                 break;
-            case '*':
-                /* code */
-                break;
-
             default:
                 break;
             }
